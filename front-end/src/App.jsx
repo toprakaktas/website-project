@@ -6,9 +6,10 @@ import './App.css'
 import HomePage from './pages/HomePage'
 import ArticlesListPage from './pages/ArticlesListPage'
 import AboutPage from './pages/AboutPage'
-import ArticlePage from './pages/ArticlePage'
+import ArticlePage, { loader as articleLoader } from './pages/ArticlePage'
 import Layout from './Layout'
 import NotFoundPage from './pages/NotFoundPage'
+
 const routes = [{
   path: '/',
   element: <Layout />,
@@ -24,8 +25,9 @@ const routes = [{
       path: '/articles',
       element: <ArticlesListPage />
     }, {
-      path: '/articles/:name',
-      element: <ArticlePage />
+      path: '/articles/:name', // -> /articles/learn-react
+      element: <ArticlePage />,
+      loader: articleLoader
     }]
 }]
 const router = createBrowserRouter(routes);
