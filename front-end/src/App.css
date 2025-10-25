@@ -2,5 +2,34 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+  text-align: start;
+}
+
+label {
+  border-radius: 0.75em;
+  display:block;
+  align-items: center;
+  margin-bottom: 0.5em;
+  padding-block: 0.5em;
+  font-weight: bold;
+  align-content:space-evenly;
+}
+label input {
+  align-content: space-around;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+  padding-block: 0.3em;
+  padding-left: 0.5em;
+}
+
+div#comment {
+  padding-left: 1em;;
+  margin-block: 1em;
+  border: 0.1em solid #d4f0fb;
+  border-radius: 0.75em;
+}
+div#comment > h4 + p{
+  padding-left: 1em;;
+  padding-block: 0.25em;
+  text-indent: 1em;
 }
