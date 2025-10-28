@@ -12,7 +12,8 @@ dist
 dist-ssr
 *.local
 back-end/credentials.json
-
+front-end/src/main.jsx
+.env
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
