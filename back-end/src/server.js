@@ -1,11 +1,16 @@
 import express from 'express';
 import { MongoClient, ReturnDocument, ServerApiVersion } from 'mongodb';
+import admin from 'firebase-admin';
+import fs from 'fs';
 
-const articleInfo = [
-    { name: 'learn-react', upvotes: 0, comments: [] },
-    { name: 'mongodb', upvotes: 0, comments: [] },
-    { name: 'full-stack development', upvotes: 0, comments: [] }
-]
+const credentials = JSON.parse(
+    fs.readFileSync('./credentials.json')
+);
+
+admin.initializeApp({
+  credential: admin.credential.cert(credentials)
+});
+
 
 const app = express();
 
@@ -49,14 +54,41 @@ app.get('/api/articles/:name', async (req, res) => {
     res.json(article);
 });
 
+app.use(async function (req, res, next) {
+    const { authtoken } = req.headers;
+
+    if (authtoken) {
+        const user = await admin.auth().verifyIdToken(authtoken);
+        req.user = user;
+        next();
+    } else {
+        res.sendStatus(400);
+    }
+});
+
 app.post('/api/articles/:name/upvote', async (req, res) => {
     const { name } = req.params;
-    const updatedArticle = await db.collection('articles').findOneAndUpdate(
+    const { uid } = req.user;
+
+    const article = await db.collection('articles').findOne({ name });
+    
+    const upvoteIds = article.upvoteIds || [];
+    const canUpvote = uid && !upvoteIds.includes(uid);
+
+    if (canUpvote) {
+        const updatedArticle = await db.collection('articles').findOneAndUpdate(
         { name },
-        { $inc: { upvotes: 1 } },
+        {
+            $inc: { upvotes: 1 },
+            $push: { upvoteIds: uid },
+        },
         { returnDocument: "after" }
-    );
+        );
     res.json(updatedArticle);
+        
+    } else {
+        res.sendStatus(403); // User is not authorized to action
+    }
 });
 
 app.post('/api/articles/:name/comments', async (req, res) => {
