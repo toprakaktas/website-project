@@ -2,6 +2,10 @@ import express from 'express';
 import { MongoClient, ReturnDocument, ServerApiVersion } from 'mongodb';
 import admin from 'firebase-admin';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const credentials = JSON.parse(
     fs.readFileSync('./credentials.json')
@@ -19,9 +23,11 @@ app.use(express.json());
 let db;
 
 async function connectToDB() {
-    const uri = 'mongodb://127.0.0.1:27017';
+    const uri = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@cluster0.9lxrix2.mongodb.net/?appName=Cluster0`;
 
     const client = new MongoClient(uri, {
+        ssl: true,
+        tlsAllowInvalidCertificates: false,
         serverApi: {
             version: ServerApiVersion.v1,
             strict: true,
@@ -45,6 +51,12 @@ async function connectToDB() {
 // app.post('/hello', function (req, res) {
 //    res.send('Hello, '+ req.body.name + ' from the POST endpoint!')
 // });
+
+app.use(express.static(path.join(__dirname, '../dist')));
+
+app.get(/^(?!\/api).+/, (req, res) => {
+    res.sendFile(path.join(__dirname, '../build/index.html'));
+});
 
 app.get('/api/articles/:name', async (req, res) => {
     const { name } = req.params;
@@ -105,10 +117,12 @@ app.post('/api/articles/:name/comments', async (req, res) => {
     res.json(updatedArticle);
 });
 
+const PORT = process.env.PORT || 8000;
+
 async function start() {
     await connectToDB();   
-    app.listen(8000, function () {
-        console.log('Server is listening on port 8000');
+    app.listen(PORT, function () {
+        console.log('Server is listening on port ' + PORT);
     });
 }
 
